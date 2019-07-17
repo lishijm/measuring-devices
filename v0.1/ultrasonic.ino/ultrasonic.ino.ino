@@ -2,7 +2,6 @@
 
 int echo=2;
 int trig=3;
-int led=13;
 
 void step(){
     Serial.begin(9600);
