@@ -12,7 +12,6 @@ void loop(){
     digitalWrite(trig,LOW);
     delayMicroseconds(2);
     digitalWrite(trig,HIGH);
-
     delayMicroseconds(10);
     digitalWrite(trig,LOW);
     int distance=pulseIn(echo,HIGH);
