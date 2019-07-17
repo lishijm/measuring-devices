@@ -15,10 +15,10 @@ void loop(){
     delayMicroseconds(2);
     digitalWrite(trig,HIGH);
 
-    deMicroseconds(10);
+    delayMicroseconds(10);
     digitalWrite(trig,LOW);
-    int distance=pluseIn(echo,HIGH);
-    distace=distance/58;
+    int distance=pulseIn(echo,HIGH);
+    distance=distance/58;
     Serial.println(distance);
     delay(50);
 }
