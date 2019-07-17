@@ -2,12 +2,10 @@
 
 int echo=2;
 int trig=3;
-int led=13;
 
-void step(){
+void setup(){
     Serial.begin(9600);
-    pinMode(echo,OUTPUT);
-    pinMode(echo,OUTPUT);
+    pinMode(echo,INPUT);
     pinMode(trig,OUTPUT);
 }
 void loop(){
