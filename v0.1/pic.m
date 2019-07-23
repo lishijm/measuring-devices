@@ -1,31 +1,31 @@
-RGB=imread('C:\Users\Administrator\Desktop\5.jpg');%è¯»å–å›¾åƒ
-I1=rgb2gray(RGB);%è½¬åŒ–ä¸ºç°åº¦å›¾åƒ
-K=medfilt2(I1,[3 3]);%å¢å¼ºå›¾åƒï¼Œè¿›è¡Œ3*3ä¸­å€¼æ»¤æ³¢
-L=histeq(K);%ç°åº¦å›¾åƒç›´æ–¹å›¾å‡è¡¡åŒ–
-BW=edge(L,'prewitt');%ç”¨prewittç®—å­è¿›è¡Œè¾¹ç¼˜æ£€æµ‹
+RGB=imread('C:\Users\Administrator\Desktop\5.jpg');%¶ÁÈ¡Í¼Ïñ
+I1=rgb2gray(RGB);%×ª»¯Îª»Ò¶ÈÍ¼Ïñ
+K=medfilt2(I1,[3 3]);%ÔöÇ¿Í¼Ïñ£¬½øĞĞ3*3ÖĞÖµÂË²¨
+L=histeq(K);%»Ò¶ÈÍ¼ÏñÖ±·½Í¼¾ùºâ»¯
+BW=edge(L,'prewitt');%ÓÃprewittËã×Ó½øĞĞ±ßÔµ¼ì²â
 CW=bwmorph(BW,'dilate');
 imshow(BW);
 figure,imshow(CW);
 [H,T,R]=hough(CW,'RhoResolution',0.75,'ThetaResolution',0.75);
 figure,imshow(imadjust(mat2gray(H)),'XData',T,'YData',R,'InitialMagnification','fit');
-title('éœå¤«ç©ºé—´');
+title('»ô·ò¿Õ¼ä');
 xlabel('\theta'),ylabel('\rho');
 axis on,axis normal,hold on;
 colormap(hot);
-P =houghpeaks(H,4);%æ˜¾ç¤ºå³°å€¼ç´¯åŠ å™¨çš„ä½ç½®
+P =houghpeaks(H,4);%ÏÔÊ¾·åÖµÀÛ¼ÓÆ÷µÄÎ»ÖÃ
 x=T(P(:,2));
 y=R(P(:,1));
-plot(x,y,'s','color','white');%å°†å³°å€¼ç‚¹åœ¨éœå¤«ç©ºé—´æ ‡å‡º
+plot(x,y,'s','color','white');%½«·åÖµµãÔÚ»ô·ò¿Õ¼ä±ê³ö
 lines=houghlines(CW,T,R,P,'FillGap',5,'MinLength',10);
-%æ ¹æ®å³°å€¼ç´¯åŠ å™¨çš„ä½ç½®ç¡®å®šç›´çº¿æ®µï¼Œæœ€çŸ­è·ç¦»ä¸º5ï¼Œå°äº5çš„è§†ä¸ºåŒä¸€æ¡ç›´çº¿ï¼›ç›´çº¿æ®µçš„
-%æœ€çŸ­è·ç¦»ä¸º10ï¼Œå¦åˆ™å°†ä¸ä¼šè¢«æ£€æµ‹åˆ°
+%¸ù¾İ·åÖµÀÛ¼ÓÆ÷µÄÎ»ÖÃÈ·¶¨Ö±Ïß¶Î£¬×î¶Ì¾àÀëÎª5£¬Ğ¡ÓÚ5µÄÊÓÎªÍ¬Ò»ÌõÖ±Ïß£»Ö±Ïß¶ÎµÄ
+%×î¶Ì¾àÀëÎª10£¬·ñÔò½«²»»á±»¼ì²âµ½
 imshow(RGB),hold on;
-b=floor([lines.rho]);%å‘ä¸‹å–æ•´
+b=floor([lines.rho]);%ÏòÏÂÈ¡Õû
 point1=cat(1,lines.point1);
 point2=cat(1,lines.point2);
 k=1;
 while k<length(b)
-if abs(lines(k).theta)<92&abs(lines(k).theta)>88%é™å®šèŒƒå›´
+if abs(lines(k).theta)<92&abs(lines(k).theta)>88%ÏŞ¶¨·¶Î§
 xy(1,:)=point1(k,:);
 xy(2,:)=point2(k,:);
 for a=k+1:length(b)
@@ -33,12 +33,12 @@ if b(k)==b(a),
 xy(2,:)=point2(a,:);
 k=a;
 end
-End%å°†å±äºåŒä¸€ç›´çº¿çš„ç›´çº¿æ®µé‡ç»„
-if abs(xy(1,1)-xy(2,1))>100%é‡ç»„åçš„ç›´çº¿é•¿åº¦åº”å¤§äº100
-plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','green');%ç”»å‡ºé‡ç»„åçš„ç›´çº¿
-plot(xy(1,1),xy(1,2),'x','LineWidth',2,'Color','yellow');%æ ‡å‡ºç«¯ç‚¹
+End%½«ÊôÓÚÍ¬Ò»Ö±ÏßµÄÖ±Ïß¶ÎÖØ×é
+if abs(xy(1,1)-xy(2,1))>100%ÖØ×éºóµÄÖ±Ïß³¤¶ÈÓ¦´óÓÚ100
+plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','green');%»­³öÖØ×éºóµÄÖ±Ïß
+plot(xy(1,1),xy(1,2),'x','LineWidth',2,'Color','yellow');%±ê³ö¶Ëµã
 plot(xy(2,1),xy(2,2),'x','LineWidth',2,'Color','red');
-temp(i)=b(k);&ä¿å­˜RHOçš„å€¼
+temp(i)=b(k);&±£´æRHOµÄÖµ
 i=i+1;
 end
 end
@@ -47,4 +47,4 @@ end
 hold off;
 y1=max(abs(b));
 y2=min(abs(b));
-h=y1-y2%è®¡ç®—éšœç¢ç‰©çš„æˆåƒé«˜åº¦
+h=y1-y2%¼ÆËãÕÏ°­ÎïµÄ³ÉÏñ¸ß¶È
