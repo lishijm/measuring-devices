@@ -1,4 +1,4 @@
-RGB=imread('C:\Users\Administrator\Desktop\5.jpg');%读取图像
+RGB=imread('C:\Users\Administrator\Desktop\1.jpg');%读取图像
 I1=rgb2gray(RGB);%转化为灰度图像
 K=medfilt2(I1,[3 3]);%增强图像，进行3*3中值滤波
 L=histeq(K);%灰度图像直方图均衡化
