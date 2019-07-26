@@ -1,12 +1,32 @@
 ﻿  源.cpp
-D:\measuring devices\v0.2\opencv version\源.cpp(36,26): warning C4244:  “=”: 从“float”转换到“_Tp”，可能丢失数据
-D:\measuring devices\v0.2\opencv version\源.cpp(36,26): warning C4244:         with
-D:\measuring devices\v0.2\opencv version\源.cpp(36,26): warning C4244:         [
-D:\measuring devices\v0.2\opencv version\源.cpp(36,26): warning C4244:             _Tp=uchar
-D:\measuring devices\v0.2\opencv version\源.cpp(36,26): warning C4244:         ]
-D:\measuring devices\v0.2\opencv version\源.cpp(52,51): warning C4244:  “=”: 从“double”转换到“_Tp”，可能丢失数据
-D:\measuring devices\v0.2\opencv version\源.cpp(52,51): warning C4244:         with
-D:\measuring devices\v0.2\opencv version\源.cpp(52,51): warning C4244:         [
-D:\measuring devices\v0.2\opencv version\源.cpp(52,51): warning C4244:             _Tp=uchar
-D:\measuring devices\v0.2\opencv version\源.cpp(52,51): warning C4244:         ]
+D:\measuring devices\v0.2\opencv version\源.cpp(22,51): warning C4244:  “=”: 从“double”转换到“_Tp”，可能丢失数据
+D:\measuring devices\v0.2\opencv version\源.cpp(22,51): warning C4244:         with
+D:\measuring devices\v0.2\opencv version\源.cpp(22,51): warning C4244:         [
+D:\measuring devices\v0.2\opencv version\源.cpp(22,51): warning C4244:             _Tp=uchar
+D:\measuring devices\v0.2\opencv version\源.cpp(22,51): warning C4244:         ]
+D:\measuring devices\v0.2\opencv version\源.cpp(54,26): warning C4244:  “=”: 从“float”转换到“_Tp”，可能丢失数据
+D:\measuring devices\v0.2\opencv version\源.cpp(54,26): warning C4244:         with
+D:\measuring devices\v0.2\opencv version\源.cpp(54,26): warning C4244:         [
+D:\measuring devices\v0.2\opencv version\源.cpp(54,26): warning C4244:             _Tp=uchar
+D:\measuring devices\v0.2\opencv version\源.cpp(54,26): warning C4244:         ]
+D:\measuring devices\v0.2\opencv version\源.cpp(87,18): warning C4244:  “参数”: 从“float”转换到“_Tp”，可能丢失数据
+D:\measuring devices\v0.2\opencv version\源.cpp(87,18): warning C4244:         with
+D:\measuring devices\v0.2\opencv version\源.cpp(87,18): warning C4244:         [
+D:\measuring devices\v0.2\opencv version\源.cpp(87,18): warning C4244:             _Tp=int
+D:\measuring devices\v0.2\opencv version\源.cpp(87,18): warning C4244:         ]
+D:\measuring devices\v0.2\opencv version\源.cpp(88,46): warning C4244:  “参数”: 从“float”转换到“_Tp”，可能丢失数据
+D:\measuring devices\v0.2\opencv version\源.cpp(88,46): warning C4244:         with
+D:\measuring devices\v0.2\opencv version\源.cpp(88,46): warning C4244:         [
+D:\measuring devices\v0.2\opencv version\源.cpp(88,46): warning C4244:             _Tp=int
+D:\measuring devices\v0.2\opencv version\源.cpp(88,46): warning C4244:         ]
+D:\measuring devices\v0.2\opencv version\源.cpp(93,21): warning C4244:  “参数”: 从“float”转换到“_Tp”，可能丢失数据
+D:\measuring devices\v0.2\opencv version\源.cpp(93,21): warning C4244:         with
+D:\measuring devices\v0.2\opencv version\源.cpp(93,21): warning C4244:         [
+D:\measuring devices\v0.2\opencv version\源.cpp(93,21): warning C4244:             _Tp=int
+D:\measuring devices\v0.2\opencv version\源.cpp(93,21): warning C4244:         ]
+D:\measuring devices\v0.2\opencv version\源.cpp(94,58): warning C4244:  “参数”: 从“float”转换到“_Tp”，可能丢失数据
+D:\measuring devices\v0.2\opencv version\源.cpp(94,58): warning C4244:         with
+D:\measuring devices\v0.2\opencv version\源.cpp(94,58): warning C4244:         [
+D:\measuring devices\v0.2\opencv version\源.cpp(94,58): warning C4244:             _Tp=int
+D:\measuring devices\v0.2\opencv version\源.cpp(94,58): warning C4244:         ]
   opencv version.vcxproj -> D:\measuring devices\v0.2\opencv version\x64\Debug\opencv version.exe
