@@ -1,134 +1,155 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <iostream>
-#include <opencv2/opencv.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-
-using namespace cv;
+#include "opencv2/core/core.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/video/background_segm.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "highgui.h"
+#include <opencv\cxcore.hpp>
+#include<opencv2\opencv.hpp>
+#include<Windows.h> 
+#include<string.h>
+#include <stdio.h>
 using namespace std;
+using namespace cv;
 
-//灰度转换
-Mat gryi(Mat ogimg) {
-	int row = ogimg.rows;
-	int col = ogimg.cols;
-	Mat gryimg = Mat(row, col, CV_8UC1);//构造mat矩阵单通道用于存放灰度图
+Mat g_srcImage;
+Mat g_grayImage;
 
-	for (int i = 0; i < row; i++) {
-		for (int j = 0; j < col; j++) {
-			uchar b = ogimg.at<Vec3b>(i, j)[0];//注意rgb的存放顺序
-			uchar g = ogimg.at<Vec3b>(i, j)[1];
-			uchar r = ogimg.at<Vec3b>(i, j)[2];
-			gryimg.at<uchar>(i, j) = r * 0.299 + g * 0.587 + b * 0.114;//灰度转换公式
+const int g_dReferWidth = 19;//比例，串口数据更改！ 
+double g_dPixelsPerMetric;
+vector<vector<cv::Point>> g_vContours;
+vector<Vec4i> g_vHierarchy;
+bool g_bFirst = true;
+
+HANDLE hComm;
+char lpOutbuffer[100];
+DWORD dwbyte = 100;
+
+static cv::Point2f midpoint(cv::Point2f& ptA, cv::Point2f& ptB);//求中点 
+static float getDistance(Point2f pointA, Point2f pointB);//求距离
+static bool ContoursSortFun(vector<cv::Point> contour1, vector<cv::Point> contour2);//按照 x坐标 排序
+
+int main(int argc, const char** argv)
+{
+	//获取摄像头图像
+	cv::namedWindow("Camera", cv::WINDOW_AUTOSIZE);   // set windows auto
+	cv::VideoCapture capture(0);                      // default 0 is the first of camera in computer
+	cv::Mat bgr_frame;
+	Mat img1;
+	while (true) {
+		COMSTAT Comstat;
+		DWORD dwError;
+		BOOL bWritestat;
+		hComm = CreateFile("COM3", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, NULL);
+		if (hComm == INVALID_HANDLE_VALUE)
+		{
+			cout << "FLASE";
+			return -1;
 		}
-	}
-	return gryimg;
-}
-//prewitt算子边缘检测
-Mat prewitt(Mat ogimg) {
-	float prewittx[9] = {
-		-1,0,1,
-		-1,0,1,
-		-1,0,1
-	};
-	float prewitty[9] = {
-		1,1,1,
-		0,0,0,
-		-1,-1,-1
-	};
-	Mat px = Mat(3, 3, CV_32F, prewittx);
-	cout << px << endl;
-	Mat py = Mat(3, 3, CV_32F, prewitty);
-	cout << py << endl;
-	Mat dstx = Mat(ogimg.size(), ogimg.type(), ogimg.channels());
-	Mat dsty = Mat(ogimg.size(), ogimg.type(), ogimg.channels());
-	Mat dst = Mat(ogimg.size(), ogimg.type(), ogimg.channels());
-	filter2D(ogimg, dstx, ogimg.depth(), px);
-	filter2D(ogimg, dsty, ogimg.depth(), py);
-	float tempx, tempy, temp;
-	for (int i = 0; i < ogimg.rows; i++) {
-		for (int j = 0; j < ogimg.cols; j++) {
-			tempx = dstx.at<uchar>(i, j);
-			tempy = dsty.at<uchar>(i, j);
-			temp = sqrt(tempx * tempx + tempy * tempy);
-			dst.at<uchar>(i, j) = temp;
+		else
+		{
+			cout << "TURE";
 		}
+		DCB dcb;
+		GetCommState(hComm, &dcb);
+		dcb.BaudRate = 9600;
+		dcb.ByteSize = 8;
+		dcb.Parity = NOPARITY;
+		dcb.StopBits = TWOSTOPBITS;
+		bool set = SetCommState(hComm, &dcb);
+		bool sup = SetupComm(hComm, 1024, 1024);
+		printf("\n%d\n", sup);
+
+		capture >> g_srcImage;
+		if (g_srcImage.empty())
+			break;
+		cv::imshow("Camera", g_srcImage);
+		char c = cv::waitKey(1);
+		if (c == 27)
+			break;
+
+		//灰度 降低计算量
+		cvtColor(g_srcImage, g_grayImage, COLOR_BGR2GRAY);
+
+		//高斯滤波 降噪
+		GaussianBlur(g_grayImage, g_grayImage, Size(7, 7), 0);
+		imshow("高斯滤波", g_grayImage);
+
+		//经测试不使用直方图均衡化，更大图像反差获取物体边缘的成功率更高
+		//equalizeHist(g_grayImage, g_grayImage);
+
+		//边缘检测
+		Canny(g_grayImage, g_grayImage, 50, 100);
+
+		Mat element = getStructuringElement(MORPH_RECT, Size(15, 15)); //隔开物体
+		dilate(g_grayImage, g_grayImage, element);//膨胀
+		erode(g_grayImage, g_grayImage, element);//腐蚀
+		imshow("形态学", g_grayImage);
+
+		//寻找轮廓
+		findContours(g_grayImage, g_vContours, g_vHierarchy, CV_RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+
+		std::sort(g_vContours.begin(), g_vContours.end(), ContoursSortFun);//按照从左到右 排序
+		for (unsigned i = 0; i < g_vContours.size(); i++) {
+
+			if (contourArea(g_vContours[i]) < 100)//面积太小 则忽略
+				continue;
+
+			RotatedRect box = minAreaRect(g_vContours[i]);
+			Point2f boxPoints[4];
+			box.points(boxPoints);
+
+			Point2f pointA = midpoint(boxPoints[0], boxPoints[1]);
+			Point2f pointB = midpoint(boxPoints[1], boxPoints[2]);
+			Point2f pointC = midpoint(boxPoints[2], boxPoints[3]);
+			Point2f pointD = midpoint(boxPoints[3], boxPoints[0]);
+
+			circle(g_srcImage, pointA, 2, Scalar(0, 0, 255));
+			circle(g_srcImage, pointB, 2, Scalar(0, 0, 255));
+			circle(g_srcImage, pointC, 2, Scalar(0, 0, 255));
+			circle(g_srcImage, pointD, 2, Scalar(0, 0, 255));
+
+			line(g_srcImage, pointA, pointC, Scalar(255, 0, 0));
+			line(g_srcImage, pointD, pointB, Scalar(255, 0, 0));
+
+			double dWidth = getDistance(pointA, pointC);
+			double dHeight = getDistance(pointD, pointB);
+			if (g_bFirst) {
+				g_dPixelsPerMetric = dWidth / g_dReferWidth; //计算像素与 实际大小的比列
+				cout << "pixelPerMetric:" << dWidth << " " << g_dReferWidth << "  " << g_dPixelsPerMetric;
+				g_bFirst = false;
+			}
+
+			cout << "dWidth" << dWidth << "   " << dHeight << "      " << dWidth / g_dPixelsPerMetric << "    " << dHeight / g_dPixelsPerMetric;
+			putText(g_srcImage, cv::format("(%.0f,%.0f)", dWidth / g_dPixelsPerMetric, dHeight / g_dPixelsPerMetric), boxPoints[2], FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 0, 255));
+
+			for (int i = 0; i <= 3; i++)
+			{
+				line(g_srcImage, boxPoints[i], boxPoints[(i + 1) % 4], Scalar(0, 255, 0));
+			}
+		}
+
+
+		cv::namedWindow("效果", CV_WINDOW_AUTOSIZE);
+		cv::imshow("效果", g_srcImage);
+
+		waitKey(0);
 	}
-	return dst;
-}
-//膨胀函数
-Mat dilatei(Mat ogimg) {
-	Mat dst;
-	Mat structure_element = getStructuringElement(MORPH_RECT, Size(3, 3)); //设置膨胀/腐蚀的核为矩形，大小为3*3
-	dilate(ogimg, dst, structure_element); //膨胀
-	//erode(dst, dst, structure_element);//腐蚀
-	return dst;
-}
-//霍夫变换
-Mat houghi(Mat ogimg, Mat ogoimg) {
-
-	vector<Vec4i>lines;
-	HoughLinesP(ogimg, lines, 1, CV_PI / 180, 180, 50, 10);
-
-	//一次在图中绘制出每条线段
-	for (size_t i = 0; i < lines.size(); i++)
-	{
-		Vec4i l = lines[i];
-		line(ogoimg, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(186, 88, 255), 1, LINE_AA);
-
-	}/*
-	vector<Vec2f>lines;
-	HoughLines(ogimg, lines, 1, CV_PI / 180, 150, 0, 0);
-	for (size_t i = 0; i < lines.size(); i++){
-		float rho = lines[i][0];
-		float theta = lines[i][1];
-		Point pt1, pt2;
-		double a = cos(theta), b = sin(theta);
-		double x0 = a * rho, y0 = b * rho;
-		pt1.x = cvRound(x0 + 1000 * (-b));
-		pt1.y = cvRound(y0 + 1000 * (a));
-		pt2.x = cvRound(x0 - 1000 * (-b));
-		pt2.y = cvRound(y0 - 1000 * (a));
-		line(ogoimg, pt1, pt2, Scalar(55, 100, 195), 1, LINE_AA);
-
-	}*/
-	return ogoimg;
-}
-Mat cannyi(Mat ogimg) {
-	Mat dst, dst2;
-	Canny(ogimg, dst, 50, 200, 3);
-	cvtColor(dst, dst2, CV_GRAY2BGR);
-	return dst;
-}
-
-int main() {
-	//读取图像
-	Mat img = imread("D:\\opencvtest\\03.jpg");
-	if (img.empty()) {
-		cout << "fail to load image !" << endl;
-		return -1;
-	}
-	//灰度转换，每个像素挨个转换？
-	Mat gryimg = gryi(img);
-	//中值滤波
-	Mat mbimg;
-	medianBlur(gryimg, mbimg, 3);//数字为孔径参数，为大于1的奇数
-	//直方图均衡化
-	Mat blimg;
-	equalizeHist(mbimg, blimg);
-	//边缘检测
-	Mat ptimg = prewitt(blimg);
-	Mat canimg = cannyi(blimg);
-	//膨胀后腐蚀
-	Mat dilateimg = dilatei(ptimg);
-	Mat dilateimg2 = dilatei(canimg);
-	//hough变换检测直线
-	Mat houimg = houghi(dilateimg2, img);
-	//显示
-	namedWindow("opencv test", CV_WINDOW_AUTOSIZE);
-	imshow("opencv test", houimg);
-	imshow("imgorg", gryimg);
-	imshow("canimg", dilateimg2);
-	waitKey(0);
 	return 0;
+}
+
+Point2f midpoint(Point2f& ptA, Point2f& ptB) {
+	return Point2f((ptA.x + ptB.x) * 0.5, (ptA.y + ptB.y) * 0.5);
+}
+
+float getDistance(Point2f pointA, Point2f pointB)
+{
+	float distance;
+	distance = powf((pointA.x - pointB.x), 2) + powf((pointA.y - pointB.y), 2);
+	distance = sqrtf(distance);
+	return distance;
+}
+
+bool ContoursSortFun(vector<cv::Point> contour1, vector<cv::Point> contour2) {
+	return  (contour1[0].x < contour2[0].x); // a.x < b.x;
 }
