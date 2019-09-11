@@ -1,15 +1,12 @@
 ﻿  源.cpp
-D:\measuring devices\v0.2\opencv version\源.cpp(40,11): warning C4101:  “Comstat”: 未引用的局部变量
-D:\measuring devices\v0.2\opencv version\源.cpp(42,8): warning C4101:  “bWritestat”: 未引用的局部变量
-D:\measuring devices\v0.2\opencv version\源.cpp(41,9): warning C4101:  “dwError”: 未引用的局部变量
-D:\measuring devices\v0.2\opencv version\源.cpp(142,56): warning C4244:  “参数”: 从“double”转换到“_Tp”，可能丢失数据
-D:\measuring devices\v0.2\opencv version\源.cpp(142,56): warning C4244:         with
-D:\measuring devices\v0.2\opencv version\源.cpp(142,56): warning C4244:         [
-D:\measuring devices\v0.2\opencv version\源.cpp(142,56): warning C4244:             _Tp=float
-D:\measuring devices\v0.2\opencv version\源.cpp(142,56): warning C4244:         ]
-D:\measuring devices\v0.2\opencv version\源.cpp(142,33): warning C4244:  “参数”: 从“double”转换到“_Tp”，可能丢失数据
-D:\measuring devices\v0.2\opencv version\源.cpp(142,33): warning C4244:         with
-D:\measuring devices\v0.2\opencv version\源.cpp(142,33): warning C4244:         [
-D:\measuring devices\v0.2\opencv version\源.cpp(142,33): warning C4244:             _Tp=float
-D:\measuring devices\v0.2\opencv version\源.cpp(142,33): warning C4244:         ]
+D:\measuring devices\v0.2\opencv version\源.cpp(167,56): warning C4244:  “参数”: 从“double”转换到“_Tp”，可能丢失数据
+D:\measuring devices\v0.2\opencv version\源.cpp(167,56): warning C4244:         with
+D:\measuring devices\v0.2\opencv version\源.cpp(167,56): warning C4244:         [
+D:\measuring devices\v0.2\opencv version\源.cpp(167,56): warning C4244:             _Tp=float
+D:\measuring devices\v0.2\opencv version\源.cpp(167,56): warning C4244:         ]
+D:\measuring devices\v0.2\opencv version\源.cpp(167,33): warning C4244:  “参数”: 从“double”转换到“_Tp”，可能丢失数据
+D:\measuring devices\v0.2\opencv version\源.cpp(167,33): warning C4244:         with
+D:\measuring devices\v0.2\opencv version\源.cpp(167,33): warning C4244:         [
+D:\measuring devices\v0.2\opencv version\源.cpp(167,33): warning C4244:             _Tp=float
+D:\measuring devices\v0.2\opencv version\源.cpp(167,33): warning C4244:         ]
   opencv version.vcxproj -> D:\measuring devices\v0.2\opencv version\x64\Debug\opencv version.exe
