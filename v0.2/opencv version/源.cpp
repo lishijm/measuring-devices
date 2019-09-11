@@ -26,7 +26,6 @@ HANDLE hCom;
 static cv::Point2f midpoint(cv::Point2f& ptA, cv::Point2f& ptB);//求中点 
 static float getDistance(Point2f pointA, Point2f pointB);//求距离
 static bool ContoursSortFun(vector<cv::Point> contour1, vector<cv::Point> contour2);//按照 x坐标 排序
-bool ComRead(HANDLE hCom, LPBYTE buf, int& len);
 
 int main(int argc, const char** argv)
 {
@@ -75,15 +74,15 @@ int main(int argc, const char** argv)
 		//PurgeComm(hCom, PURGE_TXCLEAR | PURGE_RXCLEAR); //清空缓冲区
 		bReadStat = ReadFile(hCom, str, sizeof(str), &wCount, NULL);
 
-		if (!bReadStat){
+		if (!bReadStat) {
 			printf("读串口失败!");
 		}
-		else{
+		else {
 			//str[1] = '\0';
 			printf("%c\n", str[0]);
 		}
 		CloseHandle(hCom);
-		
+
 		//图像获取
 		capture >> g_srcImage;
 		if (g_srcImage.empty())
@@ -99,7 +98,7 @@ int main(int argc, const char** argv)
 		//高斯滤波 降噪
 		GaussianBlur(g_grayImage, g_grayImage, Size(7, 7), 0);
 		imshow("高斯滤波", g_grayImage);
-		
+
 		//经测试不使用直方图均衡化，更大图像反差获取物体边缘的成功率更高
 		equalizeHist(g_grayImage, g_grayImage);
 
