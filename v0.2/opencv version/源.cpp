@@ -9,6 +9,7 @@
 #include<Windows.h> 
 #include<string.h>
 #include <stdio.h>
+#include<stdlib.h>
 using namespace std;
 using namespace cv;
 
@@ -26,17 +27,17 @@ HANDLE hCom;
 static cv::Point2f midpoint(cv::Point2f& ptA, cv::Point2f& ptB);//求中点 
 static float getDistance(Point2f pointA, Point2f pointB);//求距离
 static bool ContoursSortFun(vector<cv::Point> contour1, vector<cv::Point> contour2);//按照 x坐标 排序
-bool ComRead(HANDLE hCom, LPBYTE buf, int& len);
 
-int main(int argc, const char** argv)
-{
+int main(int argc, const char** argv){
+
 	//获取摄像头图像
 	cv::namedWindow("Camera", cv::WINDOW_AUTOSIZE);   // set windows auto
 	cv::VideoCapture capture(0);                      // default 0 is the first of camera in computer
 	cv::Mat bgr_frame;
 	Mat img1;
+
 	while (true) {
-		hCom = CreateFile(TEXT("com3"),//COM1口
+		hCom = CreateFile(TEXT("com3"),
 			GENERIC_READ, //允许读
 			0, //指定共享属性，由于串口不能共享，所以该参数必须为0
 			NULL,
@@ -45,45 +46,23 @@ int main(int argc, const char** argv)
 			FILE_ATTRIBUTE_NORMAL, //属性描述，该值为FILE_FLAG_OVERLAPPED，表示使用异步I/O，该参数为0，表示同步I/O操作
 			NULL);
 
-		SetupComm(hCom, 1024, 1024); //输入缓冲区和输出缓冲区的大小都是1024
-
-		/*********************************超时设置**************************************/
-		COMMTIMEOUTS TimeOuts;
-		//设定读超时
-		TimeOuts.ReadIntervalTimeout = MAXDWORD;//读间隔超时
-		TimeOuts.ReadTotalTimeoutMultiplier = 0;//读时间系数
-		TimeOuts.ReadTotalTimeoutConstant = 0;//读时间常量
-		//设定写超时
-		TimeOuts.WriteTotalTimeoutMultiplier = 1;//写时间系数
-		TimeOuts.WriteTotalTimeoutConstant = 1;//写时间常量
-		SetCommTimeouts(hCom, &TimeOuts); //设置超时
-
-		/*****************************************配置串口***************************/
-		DCB dcb;
-		GetCommState(hCom, &dcb);
-		dcb.BaudRate = 9600; //波特率为9600
-		dcb.ByteSize = 8; //每个字节有8位
-		dcb.Parity = NOPARITY; //无奇偶校验位
-		dcb.StopBits = ONESTOPBIT; //一个停止位
-		SetCommState(hCom, &dcb);
-
-		DWORD wCount;//实际读取的字节数
-		bool bReadStat;
-
-		char str[2] = { 0 };
-
-		//PurgeComm(hCom, PURGE_TXCLEAR | PURGE_RXCLEAR); //清空缓冲区
-		bReadStat = ReadFile(hCom, str, sizeof(str), &wCount, NULL);
-
-		if (!bReadStat){
-			printf("读串口失败!");
+		if (hCom != INVALID_HANDLE_VALUE) {
+			DCB lpTest;
+			GetCommState(hCom, &lpTest); 		//获取当前的参数设置
+			lpTest.BaudRate = CBR_9600; 		//波特率为9600
+			lpTest.ByteSize = 8; 			//数据位数为8
+			lpTest.Parity = NOPARITY; 		//无校验
+			lpTest.StopBits = ONESTOPBIT; 		//1位停止位
+			SetCommState(hCom, &lpTest);		//设置通信参数
+			DWORD btsIO;
+			char dist[4];
+			ReadFile(hCom, dist, strlen(dist), &btsIO, NULL);
+			int distd = atof(dist);
+			printf("\n%d\n", distd);
 		}
-		else{
-			//str[1] = '\0';
-			printf("%c\n", str[0]);
-		}
-		CloseHandle(hCom);
-		
+			Sleep(100);
+		CloseHandle(hCom);			//关闭串口
+
 		//图像获取
 		capture >> g_srcImage;
 		if (g_srcImage.empty())
