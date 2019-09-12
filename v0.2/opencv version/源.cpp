@@ -28,7 +28,7 @@ static cv::Point2f midpoint(cv::Point2f& ptA, cv::Point2f& ptB);//求中点
 static float getDistance(Point2f pointA, Point2f pointB);//求距离
 static bool ContoursSortFun(vector<cv::Point> contour1, vector<cv::Point> contour2);//按照 x坐标 排序
 
-int main(int argc, const char** argv){
+int main(int argc, const char** argv) {
 
 	//获取摄像头图像
 	cv::namedWindow("Camera", cv::WINDOW_AUTOSIZE);   // set windows auto
@@ -60,7 +60,7 @@ int main(int argc, const char** argv){
 			int distd = atof(dist);
 			printf("\n%d\n", distd);
 		}
-			Sleep(100);
+		Sleep(100);
 		CloseHandle(hCom);			//关闭串口
 
 		//图像获取
@@ -78,7 +78,7 @@ int main(int argc, const char** argv){
 		//高斯滤波 降噪
 		GaussianBlur(g_grayImage, g_grayImage, Size(7, 7), 0);
 		imshow("高斯滤波", g_grayImage);
-		
+
 		//经测试不使用直方图均衡化，更大图像反差获取物体边缘的成功率更高
 		equalizeHist(g_grayImage, g_grayImage);
 
