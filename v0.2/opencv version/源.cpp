@@ -16,7 +16,6 @@ using namespace cv;
 Mat g_srcImage;
 Mat g_grayImage;
 
-const int g_dReferWidth = 19;//比例，串口数据更改！ 
 double g_dPixelsPerMetric;
 vector<vector<cv::Point>> g_vContours;
 vector<Vec4i> g_vHierarchy;
@@ -46,23 +45,24 @@ int main(int argc, const char** argv) {
 			FILE_ATTRIBUTE_NORMAL, //属性描述，该值为FILE_FLAG_OVERLAPPED，表示使用异步I/O，该参数为0，表示同步I/O操作
 			NULL);
 
-		if (hCom != INVALID_HANDLE_VALUE) {
-			DCB lpTest;
-			GetCommState(hCom, &lpTest); 		//获取当前的参数设置
-			lpTest.BaudRate = CBR_9600; 		//波特率为9600
-			lpTest.ByteSize = 8; 			//数据位数为8
-			lpTest.Parity = NOPARITY; 		//无校验
-			lpTest.StopBits = ONESTOPBIT; 		//1位停止位
-			SetCommState(hCom, &lpTest);		//设置通信参数
-			DWORD btsIO;
-			char dist[4];
-			ReadFile(hCom, dist, strlen(dist), &btsIO, NULL);
-			int distd = atof(dist);
-			printf("\n%d\n", distd);
-		}
+		//		if (hCom != INVALID_HANDLE_VALUE) {
+		DCB lpTest;
+		GetCommState(hCom, &lpTest); 		//获取当前的参数设置
+		lpTest.BaudRate = CBR_9600; 		//波特率为9600
+		lpTest.ByteSize = 8; 			//数据位数为8
+		lpTest.Parity = NOPARITY; 		//无校验
+		lpTest.StopBits = ONESTOPBIT; 		//1位停止位
+		SetCommState(hCom, &lpTest);		//设置通信参数
+		DWORD btsIO;
+		char dist[4];
+		ReadFile(hCom, dist, strlen(dist), &btsIO, NULL);
+		double distd = atof(dist);
+		//		}
 		Sleep(100);
 		CloseHandle(hCom);			//关闭串口
 
+		double g_dReferWidth = distd * 4;	//像素比例
+		printf("\n%f\n", g_dReferWidth);
 		//图像获取
 		capture >> g_srcImage;
 		if (g_srcImage.empty())
