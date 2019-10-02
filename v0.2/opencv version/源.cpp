@@ -16,10 +16,8 @@ using namespace cv;
 Mat g_srcImage;
 Mat g_grayImage;
 
-double g_dPixelsPerMetric;
 vector<vector<cv::Point>> g_vContours;
 vector<Vec4i> g_vHierarchy;
-bool g_bFirst = true;
 
 HANDLE hCom;
 
@@ -36,6 +34,7 @@ int main(int argc, const char** argv) {
 	Mat img1;
 
 	while (true) {
+		double gpm = 0;
 		hCom = CreateFile(TEXT("com3"),
 			GENERIC_READ, //允许读
 			0, //指定共享属性，由于串口不能共享，所以该参数必须为0
@@ -61,8 +60,10 @@ int main(int argc, const char** argv) {
 		Sleep(100);
 		CloseHandle(hCom);			//关闭串口
 
-		double g_dReferWidth = distd * 4;	//像素比例
-		printf("\n%f\n", g_dReferWidth);
+		double pmf = distd / 20.;//图像修正值
+		double g_dReferWidth = distd / pmf;	//像素比例
+		printf("\n%f\n%f\n", distd, g_dReferWidth);
+
 		//图像获取
 		capture >> g_srcImage;
 		if (g_srcImage.empty())
@@ -80,7 +81,7 @@ int main(int argc, const char** argv) {
 		imshow("高斯滤波", g_grayImage);
 
 		//经测试不使用直方图均衡化，更大图像反差获取物体边缘的成功率更高
-		equalizeHist(g_grayImage, g_grayImage);
+		//equalizeHist(g_grayImage, g_grayImage);
 
 		//边缘检测
 		Canny(g_grayImage, g_grayImage, 50, 100);
@@ -98,7 +99,7 @@ int main(int argc, const char** argv) {
 
 			if (contourArea(g_vContours[i]) < 100)//面积太小 则忽略
 				continue;
-
+			//判断框线点
 			RotatedRect box = minAreaRect(g_vContours[i]);
 			Point2f boxPoints[4];
 			box.points(boxPoints);
@@ -113,22 +114,32 @@ int main(int argc, const char** argv) {
 			circle(g_srcImage, pointC, 2, Scalar(0, 0, 255));
 			circle(g_srcImage, pointD, 2, Scalar(0, 0, 255));
 
+			//绘制框线
 			line(g_srcImage, pointA, pointC, Scalar(255, 0, 0));
 			line(g_srcImage, pointD, pointB, Scalar(255, 0, 0));
 
+			//框线像素数
 			double dWidth = getDistance(pointA, pointC);
 			double dHeight = getDistance(pointD, pointB);
-			if (g_bFirst) {
-				g_dPixelsPerMetric = dWidth / g_dReferWidth; //计算像素与 实际大小的比列
-				cout << "pixelPerMetric:" << dWidth << " " << g_dReferWidth << "  " << g_dPixelsPerMetric;
-				g_bFirst = false;
+
+			//if (g_bFirst) {
+				//g_dPixelsPerMetric = dWidth / g_dReferWidth; //计算像素与 实际大小的比列
+				//cout << "pixelPerMetric:" << dWidth << " " << g_dReferWidth << "  " << g_dPixelsPerMetric;
+				//g_bFirst = false;
+			//}
+			if (gpm == 0) {
+				gpm = dWidth / g_dReferWidth;
 			}
+			printf("%f\n", gpm);
+			printf("%f\n%f\n", dWidth, dHeight);
+			//修正实际比例
+			dWidth = dWidth * 2.5;
+			dHeight = dHeight * 2.5;
+			//cout << "dWidth" << dWidth << "   " << dHeight << "      " << dWidth / g_dPixelsPerMetric << "    " << dHeight / g_dPixelsPerMetric;
+			putText(g_srcImage, cv::format("(%.0f,%.0f)", dWidth / gpm, dHeight / gpm), boxPoints[2], FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 0, 255));
 
-			cout << "dWidth" << dWidth << "   " << dHeight << "      " << dWidth / g_dPixelsPerMetric << "    " << dHeight / g_dPixelsPerMetric;
-			putText(g_srcImage, cv::format("(%.0f,%.0f)", dWidth / g_dPixelsPerMetric, dHeight / g_dPixelsPerMetric), boxPoints[2], FONT_HERSHEY_COMPLEX, 0.5, Scalar(0, 0, 255));
-
-			for (int i = 0; i <= 3; i++)
-			{
+			//绘制框线
+			for (int i = 0; i <= 3; i++) {
 				line(g_srcImage, boxPoints[i], boxPoints[(i + 1) % 4], Scalar(0, 255, 0));
 			}
 		}
